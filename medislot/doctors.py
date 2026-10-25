@@ -38,6 +38,27 @@ def list_doctors(active_only=True):
     return get_db().execute(sql + " ORDER BY full_name").fetchall()
 
 
+def search_doctors(specialization=None, on_date=None):
+    """Active doctors filtered by specialization and, when a date is given, by
+    having working hours on that weekday (so only bookable doctors appear)."""
+    from datetime import date  # local import keeps the module header light
+
+    sql = "SELECT DISTINCT d.* FROM doctors d"
+    params = []
+    where = ["d.is_active = 1"]
+    if on_date:
+        if isinstance(on_date, str):
+            on_date = date.fromisoformat(on_date)
+        sql += " JOIN availability a ON a.doctor_id = d.id"
+        where.append("a.weekday = ?")
+        params.append(on_date.weekday())
+    if specialization:
+        where.append("d.specialization = ?")
+        params.append(specialization)
+    sql += " WHERE " + " AND ".join(where) + " ORDER BY d.full_name"
+    return get_db().execute(sql, params).fetchall()
+
+
 def get_doctor(doctor_id):
     return get_db().execute("SELECT * FROM doctors WHERE id = ?", (doctor_id,)).fetchone()
 
