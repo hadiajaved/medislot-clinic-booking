@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+{% block title %}Register{% endblock %}
+{% block content %}
+  <h1>Patient registration</h1>
+  <form method="post">
+    <label for="full_name">Full name</label>
+    <input name="full_name" id="full_name" value="{{ request.form.get('full_name', '') }}" required>
+    <label for="mobile">Mobile number (11 digits)</label>
+    <input name="mobile" id="mobile" value="{{ request.form.get('mobile', '') }}" required>
+    <label for="email">Email address</label>
+    <input name="email" id="email" type="email" value="{{ request.form.get('email', '') }}" required>
+    <label for="password">Password (min 8 characters)</label>
+    <input name="password" id="password" type="password" required>
+    <button type="submit">Register</button>
+  </form>
+{% endblock %}

@@ -3,4 +3,7 @@
 {% block content %}
   <h1>Welcome to MediSlot</h1>
   <p>Book clinic appointments online, receive a token number and skip the queue.</p>
+  {% if not g.user %}
+    <a class="btn" href="{{ url_for('auth.register') }}">Create a patient account</a>
+  {% endif %}
 {% endblock %}

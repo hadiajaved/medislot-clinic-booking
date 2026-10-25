@@ -22,7 +22,15 @@
 <body>
   <header>
     <a class="brand" href="{{ url_for('index') }}">MediSlot Clinic</a>
-    <nav></nav>
+    <nav>
+      {% if g.user %}
+        <span>Hi, {{ g.user['full_name'] }}</span>
+        <a href="{{ url_for('auth.logout') }}">Log out</a>
+      {% else %}
+        <a href="{{ url_for('auth.register') }}">Register</a>
+        <a href="{{ url_for('auth.login') }}">Log in</a>
+      {% endif %}
+    </nav>
   </header>
   <main>
     {% for message in get_flashed_messages() %}
