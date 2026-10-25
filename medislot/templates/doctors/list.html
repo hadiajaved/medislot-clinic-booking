@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+{% block title %}Doctors{% endblock %}
+{% block content %}
+  <h1>Our doctors</h1>
+  {% if g.user and g.user['role'] == 'admin' %}
+    <a class="btn" href="{{ url_for('doctors.add') }}">Add doctor</a>
+  {% endif %}
+  <table>
+    <thead><tr><th>Name</th><th>Specialization</th><th>Qualification</th><th>Fee (Rs)</th><th></th></tr></thead>
+    <tbody>
+    {% for d in doctors %}
+      <tr>
+        <td>{{ d['full_name'] }}</td>
+        <td>{{ d['specialization'] }}</td>
+        <td>{{ d['qualification'] }}</td>
+        <td>{{ d['consultation_fee'] }}</td>
+        <td>
+          {% if g.user and g.user['role'] == 'admin' %}
+            <a href="{{ url_for('doctors.edit', doctor_id=d['id']) }}">Edit</a>
+          {% endif %}
+        </td>
+      </tr>
+    {% else %}
+      <tr><td colspan="5">No doctors have been added yet.</td></tr>
+    {% endfor %}
+    </tbody>
+  </table>
+{% endblock %}

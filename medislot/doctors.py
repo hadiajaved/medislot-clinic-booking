@@ -69,3 +69,63 @@ def update_doctor(doctor_id, full_name, specialization, qualification, consultat
         ),
     )
     db.commit()
+
+
+# --- Routes -----------------------------------------------------------------
+from flask import Blueprint, flash, redirect, render_template, request, url_for  # noqa: E402
+
+from .auth import role_required  # noqa: E402
+
+bp = Blueprint("doctors", __name__, url_prefix="/doctors")
+
+
+@bp.route("/")
+def index():
+    return render_template("doctors/list.html", doctors=list_doctors())
+
+
+@bp.route("/add", methods=("GET", "POST"))
+@role_required("admin")
+def add():
+    if request.method == "POST":
+        f = request.form
+        errors = validate_doctor(
+            f.get("full_name"), f.get("specialization"), f.get("qualification"), f.get("consultation_fee")
+        )
+        if not errors:
+            create_doctor(
+                f["full_name"], f["specialization"], f["qualification"], f["consultation_fee"], f.get("bio", "")
+            )
+            flash("Doctor profile added.")
+            return redirect(url_for("doctors.index"))
+        for error in errors:
+            flash(error)
+    return render_template("doctors/form.html", doctor=None, specializations=SPECIALIZATIONS)
+
+
+@bp.route("/<int:doctor_id>/edit", methods=("GET", "POST"))
+@role_required("admin")
+def edit(doctor_id):
+    doctor = get_doctor(doctor_id)
+    if doctor is None:
+        return ("Doctor not found", 404)
+    if request.method == "POST":
+        f = request.form
+        errors = validate_doctor(
+            f.get("full_name"), f.get("specialization"), f.get("qualification"), f.get("consultation_fee")
+        )
+        if not errors:
+            update_doctor(
+                doctor_id,
+                f["full_name"],
+                f["specialization"],
+                f["qualification"],
+                f["consultation_fee"],
+                f.get("bio", ""),
+                is_active=bool(f.get("is_active")),
+            )
+            flash("Doctor profile updated.")
+            return redirect(url_for("doctors.index"))
+        for error in errors:
+            flash(error)
+    return render_template("doctors/form.html", doctor=doctor, specializations=SPECIALIZATIONS)

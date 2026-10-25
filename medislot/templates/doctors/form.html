@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+{% block title %}{{ 'Edit' if doctor else 'Add' }} doctor{% endblock %}
+{% block content %}
+  <h1>{{ 'Edit doctor profile' if doctor else 'Add a doctor' }}</h1>
+  <form method="post">
+    <label for="full_name">Full name</label>
+    <input name="full_name" id="full_name" value="{{ request.form.get('full_name', doctor['full_name'] if doctor else '') }}" required>
+    <label for="specialization">Specialization</label>
+    <select name="specialization" id="specialization">
+      {% for s in specializations %}
+        <option value="{{ s }}" {% if s == request.form.get('specialization', doctor['specialization'] if doctor else '') %}selected{% endif %}>{{ s }}</option>
+      {% endfor %}
+    </select>
+    <label for="qualification">Qualification</label>
+    <input name="qualification" id="qualification" value="{{ request.form.get('qualification', doctor['qualification'] if doctor else '') }}" required>
+    <label for="consultation_fee">Consultation fee (Rs)</label>
+    <input name="consultation_fee" id="consultation_fee" type="number" min="0" value="{{ request.form.get('consultation_fee', doctor['consultation_fee'] if doctor else '') }}" required>
+    <label for="bio">Short bio</label>
+    <input name="bio" id="bio" value="{{ request.form.get('bio', doctor['bio'] if doctor else '') }}">
+    {% if doctor %}
+      <label><input type="checkbox" name="is_active" value="1" style="width:auto" {% if doctor['is_active'] %}checked{% endif %}> Active (visible to patients)</label>
+    {% endif %}
+    <button type="submit">Save</button>
+  </form>
+{% endblock %}
