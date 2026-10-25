@@ -1,4 +1,5 @@
 """Tests for MSLOT-14: define weekly availability and generate slots."""
+from medislot.doctors import link_doctor_account
 from medislot.scheduling import (
     generate_slots,
     get_availability,
@@ -67,4 +68,21 @@ def test_admin_can_save_availability_through_form(app, client, login, add_doctor
 def test_patient_cannot_edit_availability(client, login, add_doctor):
     doctor_id = add_doctor()
     login(role="patient")
+    assert client.get(f"/doctors/{doctor_id}/availability").status_code == 403
+
+
+def test_doctor_can_edit_only_own_availability(app, client, login, add_doctor):
+    own = add_doctor("Dr. Own", "Cardiologist")
+    other = add_doctor("Dr. Other", "Dermatologist")
+    login(role="doctor")  # user id 1
+    with app.app_context():
+        link_doctor_account(own, 1)
+    assert client.get(f"/doctors/{own}/availability").status_code == 200
+    assert client.get(f"/doctors/{other}/availability").status_code == 403
+    assert client.post(f"/doctors/{other}/availability/0/remove").status_code == 403
+
+
+def test_unlinked_doctor_account_cannot_edit_anyone(client, login, add_doctor):
+    doctor_id = add_doctor()
+    login(role="doctor")
     assert client.get(f"/doctors/{doctor_id}/availability").status_code == 403
