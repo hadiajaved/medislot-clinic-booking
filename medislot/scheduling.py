@@ -67,3 +67,40 @@ def remove_availability(doctor_id, weekday):
         "DELETE FROM availability WHERE doctor_id = ? AND weekday = ?", (doctor_id, int(weekday))
     )
     db.commit()
+
+
+def slots_between(start_time, end_time, slot_minutes):
+    """Pure helper: consecutive (start, end) 'HH:MM' pairs that fit in the window."""
+    today = date.today()
+    cursor = datetime.combine(today, parse_time(start_time))
+    end = datetime.combine(today, parse_time(end_time))
+    step = timedelta(minutes=int(slot_minutes))
+    slots = []
+    while cursor + step <= end:
+        slots.append((cursor.strftime("%H:%M"), (cursor + step).strftime("%H:%M")))
+        cursor += step
+    return slots
+
+
+def generate_slots(doctor_id, on_date):
+    """Return the bookable slots of a doctor on a calendar date.
+
+    ``on_date`` may be a ``date`` or an ISO string. Days without availability
+    produce an empty list, so patients are never offered them.
+    """
+    if isinstance(on_date, str):
+        on_date = date.fromisoformat(on_date)
+    row = (
+        get_db()
+        .execute(
+            "SELECT * FROM availability WHERE doctor_id = ? AND weekday = ?",
+            (doctor_id, on_date.weekday()),
+        )
+        .fetchone()
+    )
+    if row is None:
+        return []
+    return [
+        {"date": on_date.isoformat(), "start": start, "end": end}
+        for start, end in slots_between(row["start_time"], row["end_time"], row["slot_minutes"])
+    ]
