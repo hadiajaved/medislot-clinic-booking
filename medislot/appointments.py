@@ -60,6 +60,39 @@ def book_appointment(doctor_id, patient_id, on_date, start_time, booked_by=None)
     return get_appointment(cursor.lastrowid)
 
 
+def list_patient_appointments(patient_id):
+    """All appointments of a patient, soonest first."""
+    return (
+        get_db()
+        .execute(
+            "SELECT a.*, d.full_name AS doctor_name, d.specialization"
+            " FROM appointments a JOIN doctors d ON d.id = a.doctor_id"
+            " WHERE a.patient_id = ? ORDER BY a.appointment_date, a.start_time",
+            (patient_id,),
+        )
+        .fetchall()
+    )
+
+
+class NotAllowed(Exception):
+    """Raised when a user tries to change an appointment that is not theirs."""
+
+
+def cancel_appointment(appointment_id, user):
+    """Cancel a booked appointment; this frees the slot for other patients."""
+    appt = get_appointment(appointment_id)
+    if appt is None:
+        return None
+    if user["role"] not in ("admin", "receptionist") and appt["patient_id"] != user["id"]:
+        raise NotAllowed("You can only cancel your own appointments.")
+    if appt["status"] != "booked":
+        raise SlotUnavailable("Only booked appointments can be cancelled.")
+    db = get_db()
+    db.execute("UPDATE appointments SET status = 'cancelled' WHERE id = ?", (appointment_id,))
+    db.commit()
+    return get_appointment(appointment_id)
+
+
 def get_appointment(appointment_id):
     return (
         get_db()
@@ -95,6 +128,30 @@ def book():
         return redirect(url_for("schedule.slots", doctor_id=doctor_id, date=on_date))
     flash("Appointment booked. Your token number is %d." % appt["token_no"])
     return redirect(url_for("appointments.confirmation", appointment_id=appt["id"]))
+
+
+@bp.route("/mine")
+@login_required
+def mine():
+    return render_template(
+        "appointments/mine.html", appointments=list_patient_appointments(g.user["id"])
+    )
+
+
+@bp.route("/<int:appointment_id>/cancel", methods=("POST",))
+@login_required
+def cancel(appointment_id):
+    try:
+        appt = cancel_appointment(appointment_id, g.user)
+    except NotAllowed:
+        abort(403)
+    except SlotUnavailable as exc:
+        flash(str(exc))
+        return redirect(url_for("appointments.mine"))
+    if appt is None:
+        abort(404)
+    flash("Appointment #%d has been cancelled." % appt["id"])
+    return redirect(url_for("appointments.mine"))
 
 
 @bp.route("/<int:appointment_id>")

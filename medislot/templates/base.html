@@ -26,6 +26,7 @@
       <a href="{{ url_for('doctors.index') }}">Doctors</a>
       <a href="{{ url_for('doctors.search') }}">Find a doctor</a>
       {% if g.user %}
+        <a href="{{ url_for('appointments.mine') }}">My appointments</a>
         <span>Hi, {{ g.user['full_name'] }}</span>
         <a href="{{ url_for('auth.logout') }}">Log out</a>
       {% else %}
