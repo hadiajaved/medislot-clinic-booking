@@ -60,6 +60,20 @@ def book_appointment(doctor_id, patient_id, on_date, start_time, booked_by=None)
     return get_appointment(cursor.lastrowid)
 
 
+def list_patient_appointments(patient_id):
+    """All appointments of a patient, soonest first."""
+    return (
+        get_db()
+        .execute(
+            "SELECT a.*, d.full_name AS doctor_name, d.specialization"
+            " FROM appointments a JOIN doctors d ON d.id = a.doctor_id"
+            " WHERE a.patient_id = ? ORDER BY a.appointment_date, a.start_time",
+            (patient_id,),
+        )
+        .fetchall()
+    )
+
+
 def get_appointment(appointment_id):
     return (
         get_db()
@@ -95,6 +109,14 @@ def book():
         return redirect(url_for("schedule.slots", doctor_id=doctor_id, date=on_date))
     flash("Appointment booked. Your token number is %d." % appt["token_no"])
     return redirect(url_for("appointments.confirmation", appointment_id=appt["id"]))
+
+
+@bp.route("/mine")
+@login_required
+def mine():
+    return render_template(
+        "appointments/mine.html", appointments=list_patient_appointments(g.user["id"])
+    )
 
 
 @bp.route("/<int:appointment_id>")

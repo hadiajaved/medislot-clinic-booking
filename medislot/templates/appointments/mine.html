@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+{% block title %}My appointments{% endblock %}
+{% block content %}
+  <h1>My appointments</h1>
+  <table>
+    <thead><tr><th>#</th><th>Doctor</th><th>Date</th><th>Time</th><th>Token</th><th>Status</th><th></th></tr></thead>
+    <tbody>
+    {% for a in appointments %}
+      <tr>
+        <td>{{ a['id'] }}</td>
+        <td>{{ a['doctor_name'] }} ({{ a['specialization'] }})</td>
+        <td>{{ a['appointment_date'] }}</td>
+        <td>{{ a['start_time'] }} - {{ a['end_time'] }}</td>
+        <td>{{ a['token_no'] }}</td>
+        <td>{{ a['status'] }}</td>
+        <td>{% block actions scoped %}{% endblock %}</td>
+      </tr>
+    {% else %}
+      <tr><td colspan="7">You have no appointments yet. <a href="{{ url_for('doctors.search') }}">Find a doctor</a>.</td></tr>
+    {% endfor %}
+    </tbody>
+  </table>
+{% endblock %}
