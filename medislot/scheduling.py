@@ -169,10 +169,17 @@ def slots(doctor_id):
         return ("Doctor not found", 404)
     on_date = request.args.get("date", "")
     slot_list = []
+    taken = set()
     if on_date:
         try:
             slot_list = generate_slots(doctor_id, on_date)
         except ValueError:
             flash("Enter the date as YYYY-MM-DD.")
             on_date = ""
-    return render_template("doctors/slots.html", doctor=doctor, on_date=on_date, slots=slot_list)
+        else:
+            from .appointments import booked_starts  # local import avoids a circular import
+
+            taken = booked_starts(doctor_id, on_date)
+    return render_template(
+        "doctors/slots.html", doctor=doctor, on_date=on_date, slots=slot_list, taken=taken
+    )

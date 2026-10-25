@@ -11,9 +11,26 @@
     <h2>{{ on_date }}</h2>
     {% if slots %}
       <table>
-        <thead><tr><th>Start</th><th>End</th></tr></thead>
+        <thead><tr><th>Start</th><th>End</th><th>Status</th></tr></thead>
         <tbody>
-        {% for s in slots %}<tr><td>{{ s['start'] }}</td><td>{{ s['end'] }}</td></tr>{% endfor %}
+        {% for s in slots %}
+          <tr>
+            <td>{{ s['start'] }}</td>
+            <td>{{ s['end'] }}</td>
+            <td>
+              {% if s['start'] in taken %}
+                Booked
+              {% else %}
+                <form method="post" action="{{ url_for('appointments.book') }}" style="display:inline">
+                  <input type="hidden" name="doctor_id" value="{{ doctor['id'] }}">
+                  <input type="hidden" name="date" value="{{ on_date }}">
+                  <input type="hidden" name="start_time" value="{{ s['start'] }}">
+                  <button type="submit" style="margin:0">Book this slot</button>
+                </form>
+              {% endif %}
+            </td>
+          </tr>
+        {% endfor %}
         </tbody>
       </table>
     {% else %}

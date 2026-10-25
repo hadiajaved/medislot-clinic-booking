@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+{% block title %}Appointment confirmed{% endblock %}
+{% block content %}
+  <h1>Appointment confirmed</h1>
+  <p>Your appointment number is <strong>#{{ appt['id'] }}</strong>. Please arrive 10 minutes early.</p>
+  <table>
+    <tr><th>Token number</th><td><strong>{{ appt['token_no'] }}</strong></td></tr>
+    <tr><th>Patient</th><td>{{ appt['patient_name'] }}</td></tr>
+    <tr><th>Doctor</th><td>{{ appt['doctor_name'] }} ({{ appt['specialization'] }})</td></tr>
+    <tr><th>Date</th><td>{{ appt['appointment_date'] }}</td></tr>
+    <tr><th>Time</th><td>{{ appt['start_time'] }} - {{ appt['end_time'] }}</td></tr>
+    <tr><th>Consultation fee</th><td>Rs {{ appt['consultation_fee'] }}</td></tr>
+    <tr><th>Status</th><td>{{ appt['status'] }}</td></tr>
+  </table>
+  <a class="btn" href="{{ url_for('index') }}">Back to home</a>
+{% endblock %}
