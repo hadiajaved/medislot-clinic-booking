@@ -72,3 +72,37 @@ def get_appointment(appointment_id):
         )
         .fetchone()
     )
+
+
+# --- Routes -----------------------------------------------------------------
+from flask import Blueprint, abort, flash, g, redirect, render_template, request, url_for  # noqa: E402
+
+from .auth import login_required  # noqa: E402
+
+bp = Blueprint("appointments", __name__, url_prefix="/appointments")
+
+
+@bp.route("/book", methods=("POST",))
+@login_required
+def book():
+    doctor_id = request.form.get("doctor_id", type=int)
+    on_date = request.form.get("date", "")
+    start_time = request.form.get("start_time", "")
+    try:
+        appt = book_appointment(doctor_id, g.user["id"], on_date, start_time)
+    except (SlotUnavailable, ValueError) as exc:
+        flash(str(exc) if isinstance(exc, SlotUnavailable) else "Enter the date as YYYY-MM-DD.")
+        return redirect(url_for("schedule.slots", doctor_id=doctor_id, date=on_date))
+    flash("Appointment booked. Your token number is %d." % appt["token_no"])
+    return redirect(url_for("appointments.confirmation", appointment_id=appt["id"]))
+
+
+@bp.route("/<int:appointment_id>")
+@login_required
+def confirmation(appointment_id):
+    appt = get_appointment(appointment_id)
+    if appt is None:
+        abort(404)
+    if g.user["role"] not in ("admin", "receptionist") and appt["patient_id"] != g.user["id"]:
+        abort(403)
+    return render_template("appointments/confirmation.html", appt=appt)

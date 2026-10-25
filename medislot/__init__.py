@@ -32,6 +32,10 @@ def create_app(test_config=None):
 
     app.register_blueprint(scheduling.bp)
 
+    from . import appointments
+
+    app.register_blueprint(appointments.bp)
+
     @app.route("/")
     def index():
         return render_template("index.html")
