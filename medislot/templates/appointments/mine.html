@@ -13,7 +13,13 @@
         <td>{{ a['start_time'] }} - {{ a['end_time'] }}</td>
         <td>{{ a['token_no'] }}</td>
         <td>{{ a['status'] }}</td>
-        <td>{% block actions scoped %}{% endblock %}</td>
+        <td>
+          {% if a['status'] == 'booked' %}
+            <form method="post" action="{{ url_for('appointments.cancel', appointment_id=a['id']) }}" style="display:inline">
+              <button type="submit" style="margin:0;background:#b3261e">Cancel</button>
+            </form>
+          {% endif %}
+        </td>
       </tr>
     {% else %}
       <tr><td colspan="7">You have no appointments yet. <a href="{{ url_for('doctors.search') }}">Find a doctor</a>.</td></tr>
