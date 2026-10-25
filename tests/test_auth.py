@@ -59,3 +59,13 @@ def test_login_rejects_wrong_password(client, register):
         "/auth/login", data={"email": "ayesha@example.com", "password": "wrong"}, follow_redirects=True
     )
     assert b"Incorrect email or password." in response.data
+
+
+def test_login_ignores_external_redirect_target(client, register):
+    register()
+    response = client.post(
+        "/auth/login?next=https://evil.example.com",
+        data={"email": "ayesha@example.com", "password": "secret123"},
+    )
+    assert response.status_code == 302
+    assert response.headers["Location"] == "/"

@@ -8,7 +8,7 @@ def create_app(test_config=None):
     """Create and configure the Flask application."""
     app = Flask(__name__, instance_relative_config=True)
     app.config.from_mapping(
-        SECRET_KEY="dev-change-me",
+        SECRET_KEY=os.environ.get("MEDISLOT_SECRET_KEY", "dev-only-insecure-key"),
         DATABASE=os.path.join(app.instance_path, "medislot.sqlite"),
     )
     if test_config:

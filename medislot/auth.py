@@ -22,6 +22,13 @@ MOBILE_RE = re.compile(r"^\d{11}$")
 EMAIL_RE = re.compile(r"^[^@\s]+@[^@\s]+\.[^@\s]+$")
 
 
+def safe_next_url(target):
+    """Only allow redirects to local paths, never to another site (open redirect)."""
+    if target and target.startswith("/") and not target.startswith("//") and "\\" not in target:
+        return target
+    return url_for("index")
+
+
 def validate_registration(full_name, mobile, email, password):
     """Return a list of validation errors for the registration form."""
     errors = []
@@ -78,7 +85,7 @@ def login():
         else:
             session.clear()
             session["user_id"] = user["id"]
-            return redirect(request.args.get("next") or url_for("index"))
+            return redirect(safe_next_url(request.args.get("next")))
     return render_template("auth/login.html")
 
 
