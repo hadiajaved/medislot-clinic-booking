@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+{% block title %}Free slots - {{ doctor['full_name'] }}{% endblock %}
+{% block content %}
+  <h1>Free slots: {{ doctor['full_name'] }}</h1>
+  <form method="get">
+    <label for="date">Date</label>
+    <input type="date" name="date" id="date" value="{{ on_date }}" required>
+    <button type="submit">Show slots</button>
+  </form>
+  {% if on_date %}
+    <h2>{{ on_date }}</h2>
+    {% if slots %}
+      <table>
+        <thead><tr><th>Start</th><th>End</th></tr></thead>
+        <tbody>
+        {% for s in slots %}<tr><td>{{ s['start'] }}</td><td>{{ s['end'] }}</td></tr>{% endfor %}
+        </tbody>
+      </table>
+    {% else %}
+      <p>The doctor has no working hours on this day.</p>
+    {% endif %}
+  {% endif %}
+{% endblock %}

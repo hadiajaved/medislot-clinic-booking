@@ -53,3 +53,15 @@ def login(client, register):
         return client.post("/auth/login", data={"email": email, "password": password})
 
     return _login
+
+
+@pytest.fixture
+def add_doctor(app):
+    """Insert a doctor directly and return its id."""
+    from medislot.doctors import create_doctor
+
+    def _add(full_name="Dr. Sara Ahmed", specialization="Cardiologist", qualification="MBBS, FCPS", fee=2000):
+        with app.app_context():
+            return create_doctor(full_name, specialization, qualification, fee)
+
+    return _add

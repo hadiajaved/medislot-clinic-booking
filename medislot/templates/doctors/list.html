@@ -15,8 +15,10 @@
         <td>{{ d['qualification'] }}</td>
         <td>{{ d['consultation_fee'] }}</td>
         <td>
+          <a href="{{ url_for('schedule.slots', doctor_id=d['id']) }}">Free slots</a>
           {% if g.user and g.user['role'] == 'admin' %}
-            <a href="{{ url_for('doctors.edit', doctor_id=d['id']) }}">Edit</a>
+            | <a href="{{ url_for('doctors.edit', doctor_id=d['id']) }}">Edit</a>
+            | <a href="{{ url_for('schedule.availability', doctor_id=d['id']) }}">Availability</a>
           {% endif %}
         </td>
       </tr>
