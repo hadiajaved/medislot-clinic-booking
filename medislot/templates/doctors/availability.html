@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+{% block title %}Availability - {{ doctor['full_name'] }}{% endblock %}
+{% block content %}
+  <h1>Weekly availability: {{ doctor['full_name'] }}</h1>
+  <p>{{ doctor['specialization'] }} - consultation fee Rs {{ doctor['consultation_fee'] }}</p>
+  <table>
+    <thead><tr><th>Weekday</th><th>From</th><th>To</th><th>Slot length</th><th></th></tr></thead>
+    <tbody>
+    {% for row in availability %}
+      <tr>
+        <td>{{ weekdays[row['weekday']] }}</td>
+        <td>{{ row['start_time'] }}</td>
+        <td>{{ row['end_time'] }}</td>
+        <td>{{ row['slot_minutes'] }} min</td>
+        <td>
+          <form method="post" action="{{ url_for('schedule.remove_day', doctor_id=doctor['id'], weekday=row['weekday']) }}" style="display:inline">
+            <button type="submit" style="margin:0;background:#b3261e">Remove</button>
+          </form>
+        </td>
+      </tr>
+    {% else %}
+      <tr><td colspan="5">No working hours defined yet.</td></tr>
+    {% endfor %}
+    </tbody>
+  </table>
+
+  <h2>Add or update a weekday</h2>
+  <form method="post">
+    <label for="weekday">Weekday</label>
+    <select name="weekday" id="weekday">
+      {% for name in weekdays %}<option value="{{ loop.index0 }}">{{ name }}</option>{% endfor %}
+    </select>
+    <label for="start_time">Start time (HH:MM)</label>
+    <input name="start_time" id="start_time" type="time" required>
+    <label for="end_time">End time (HH:MM)</label>
+    <input name="end_time" id="end_time" type="time" required>
+    <label for="slot_minutes">Consultation duration</label>
+    <select name="slot_minutes" id="slot_minutes">
+      {% for m in slot_lengths %}<option value="{{ m }}" {% if m == 15 %}selected{% endif %}>{{ m }} minutes</option>{% endfor %}
+    </select>
+    <button type="submit">Save availability</button>
+  </form>
+{% endblock %}

@@ -28,6 +28,10 @@ def create_app(test_config=None):
 
     app.register_blueprint(doctors.bp)
 
+    from . import scheduling
+
+    app.register_blueprint(scheduling.bp)
+
     @app.route("/")
     def index():
         return render_template("index.html")
