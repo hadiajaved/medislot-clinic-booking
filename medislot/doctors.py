@@ -105,6 +105,28 @@ def index():
     return render_template("doctors/list.html", doctors=list_doctors())
 
 
+@bp.route("/search")
+def search():
+    specialization = request.args.get("specialization", "")
+    on_date = request.args.get("date", "")
+    searched = "specialization" in request.args or "date" in request.args
+    results = []
+    if searched:
+        try:
+            results = search_doctors(specialization or None, on_date or None)
+        except ValueError:
+            flash("Enter the date as YYYY-MM-DD.")
+            on_date = ""
+    return render_template(
+        "doctors/search.html",
+        doctors=results,
+        searched=searched,
+        specialization=specialization,
+        on_date=on_date,
+        specializations=SPECIALIZATIONS,
+    )
+
+
 @bp.route("/add", methods=("GET", "POST"))
 @role_required("admin")
 def add():

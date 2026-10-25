@@ -29,3 +29,18 @@ def test_search_by_date_returns_only_doctors_working_that_weekday(app, add_docto
         assert [d["full_name"] for d in search_doctors(on_date=MONDAY)] == ["Dr. Sara Ahmed"]
         assert [d["full_name"] for d in search_doctors(on_date=TUESDAY)] == ["Dr. Bilal Khan"]
         assert search_doctors(specialization="Cardiologist", on_date=TUESDAY) == []
+
+
+def test_search_page_shows_matching_doctors(app, client, add_doctor):
+    _seed(app, add_doctor)
+    page = client.get(f"/doctors/search?specialization=Cardiologist&date={MONDAY}")
+    assert b"1 doctor(s) found" in page.data
+    assert b"Dr. Sara Ahmed" in page.data
+    assert b"Dr. Bilal Khan" not in page.data
+    assert f"/doctors/1/slots?date={MONDAY}".encode() in page.data
+
+
+def test_search_page_without_filters_lists_everyone(app, client, add_doctor):
+    _seed(app, add_doctor)
+    page = client.get("/doctors/search?specialization=&date=")
+    assert b"2 doctor(s) found" in page.data

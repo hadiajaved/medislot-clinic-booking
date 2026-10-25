@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+{% block title %}Find a doctor{% endblock %}
+{% block content %}
+  <h1>Find a doctor</h1>
+  <form method="get">
+    <label for="specialization">Specialization</label>
+    <select name="specialization" id="specialization">
+      <option value="">Any specialization</option>
+      {% for s in specializations %}
+        <option value="{{ s }}" {% if s == specialization %}selected{% endif %}>{{ s }}</option>
+      {% endfor %}
+    </select>
+    <label for="date">Available on date (optional)</label>
+    <input type="date" name="date" id="date" value="{{ on_date }}">
+    <button type="submit">Search</button>
+  </form>
+
+  {% if searched %}
+    <h2>{{ doctors|length }} doctor(s) found</h2>
+    <table>
+      <thead><tr><th>Name</th><th>Specialization</th><th>Fee (Rs)</th><th></th></tr></thead>
+      <tbody>
+      {% for d in doctors %}
+        <tr>
+          <td>{{ d['full_name'] }}</td>
+          <td>{{ d['specialization'] }}</td>
+          <td>{{ d['consultation_fee'] }}</td>
+          <td><a href="{{ url_for('schedule.slots', doctor_id=d['id'], date=on_date) }}">View free slots</a></td>
+        </tr>
+      {% else %}
+        <tr><td colspan="4">No doctor matches your search. Try another date or specialization.</td></tr>
+      {% endfor %}
+      </tbody>
+    </table>
+  {% endif %}
+{% endblock %}
