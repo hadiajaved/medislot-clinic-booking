@@ -23,6 +23,7 @@ CREATE TABLE doctors (
   consultation_fee INTEGER NOT NULL CHECK (consultation_fee >= 0),
   bio              TEXT    NOT NULL DEFAULT '',
   is_active        INTEGER NOT NULL DEFAULT 1,
+  user_id          INTEGER REFERENCES users(id) ON DELETE SET NULL,  -- the doctor's own login, if any
   created_at       TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 

@@ -59,6 +59,13 @@ def search_doctors(specialization=None, on_date=None):
     return get_db().execute(sql, params).fetchall()
 
 
+def link_doctor_account(doctor_id, user_id):
+    """Connect a doctor profile to the user account the doctor logs in with."""
+    db = get_db()
+    db.execute("UPDATE doctors SET user_id = ? WHERE id = ?", (user_id, doctor_id))
+    db.commit()
+
+
 def get_doctor(doctor_id):
     return get_db().execute("SELECT * FROM doctors WHERE id = ?", (doctor_id,)).fetchone()
 

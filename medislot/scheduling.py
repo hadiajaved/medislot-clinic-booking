@@ -107,20 +107,30 @@ def generate_slots(doctor_id, on_date):
 
 
 # --- Routes -----------------------------------------------------------------
-from flask import Blueprint, flash, redirect, render_template, request, url_for  # noqa: E402
+from flask import Blueprint, abort, flash, g, redirect, render_template, request, url_for  # noqa: E402
 
-from .auth import role_required  # noqa: E402
+from .auth import login_required  # noqa: E402
 from .doctors import get_doctor  # noqa: E402
 
 bp = Blueprint("schedule", __name__, url_prefix="/doctors")
 
 
-@bp.route("/<int:doctor_id>/availability", methods=("GET", "POST"))
-@role_required("admin", "doctor")
-def availability(doctor_id):
+def _doctor_for_management(doctor_id):
+    """Load the doctor and stop unless the user is an admin or that doctor's own account."""
     doctor = get_doctor(doctor_id)
     if doctor is None:
-        return ("Doctor not found", 404)
+        abort(404)
+    is_admin = g.user["role"] == "admin"
+    is_own_profile = g.user["role"] == "doctor" and doctor["user_id"] == g.user["id"]
+    if not (is_admin or is_own_profile):
+        abort(403)
+    return doctor
+
+
+@bp.route("/<int:doctor_id>/availability", methods=("GET", "POST"))
+@login_required
+def availability(doctor_id):
+    doctor = _doctor_for_management(doctor_id)
     if request.method == "POST":
         f = request.form
         errors = validate_availability(
@@ -144,8 +154,9 @@ def availability(doctor_id):
 
 
 @bp.route("/<int:doctor_id>/availability/<int:weekday>/remove", methods=("POST",))
-@role_required("admin", "doctor")
+@login_required
 def remove_day(doctor_id, weekday):
+    _doctor_for_management(doctor_id)
     remove_availability(doctor_id, weekday)
     flash("Availability removed.")
     return redirect(url_for("schedule.availability", doctor_id=doctor_id))
