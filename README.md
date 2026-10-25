@@ -45,11 +45,31 @@ medislot-clinic-booking/
 ├── medislot/              # Flask application package
 │   ├── __init__.py        # application factory (create_app)
 │   ├── db.py              # SQLite connection helpers and init-db command
-│   ├── schema.sql         # database schema
-│   ├── auth.py            # registration, login, logout (Epic MSLOT-5)
+│   ├── schema.sql         # database schema (users, doctors, availability, appointments)
+│   ├── auth.py            # registration, login, logout         (MSLOT-10, MSLOT-11)
+│   ├── doctors.py         # doctor profiles and doctor search    (MSLOT-13, MSLOT-16)
+│   ├── scheduling.py      # weekly availability and slot generation (MSLOT-14)
+│   ├── appointments.py    # slot booking with token numbers, my appointments, cancel (MSLOT-17, MSLOT-18)
 │   └── templates/         # Jinja2 HTML templates
-└── tests/                 # pytest test suite
+└── tests/                 # pytest test suite (one file per Jira story)
 ```
+
+## Sprint 2 - Appointment Booking Flow
+
+| Jira issue | Branch | Pull request |
+|---|---|---|
+| MSLOT-13 Add and update doctor profiles | `MSLOT-13-doctor-profiles` | #1 |
+| MSLOT-14 Define weekly availability and generate slots | `MSLOT-14-weekly-availability-slots`, `MSLOT-14-availability-ownership-check` | #2, #4 |
+| MSLOT-16 Search doctors by specialization and date | `MSLOT-16-doctor-search` | #3 |
+| MSLOT-17 Book an available appointment slot | `MSLOT-17-book-appointment-slot` | #5 |
+| MSLOT-18 View, reschedule or cancel appointments | `MSLOT-18-manage-appointments` | #6 (draft, reschedule pending) |
+
+## Known limitations (future backlog items)
+
+- Forms do not yet carry CSRF tokens; a Flask-WTF based protection is planned.
+- Booking does not yet reject dates in the past or hide slots that have already passed today.
+- Doctor leave days (MSLOT-15), receptionist booking (MSLOT-19), notifications (MSLOT-20) and the
+  manager dashboard (MSLOT-21) are still in the product backlog.
 
 ## Running locally
 
